@@ -156,4 +156,4 @@ fi
 %{systemdtmpfilesdir}/prosody.conf
 %{systemdunitdir}/prosody.service
 %dir %attr(755,prosody,prosody) %{_sharedstatedir}/prosody
-%dir %attr(755,prosody,prosody) %{_localstatedir}/run/prosody
+%dir %attr(710,prosody,prosody) %{_localstatedir}/run/prosody
