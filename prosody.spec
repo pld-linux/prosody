@@ -1,7 +1,4 @@
 # TODO
-# - register uid/gid
-# - register group (default "users" is not fine!)
-# - useradd deps
 # - bashism in %post
 # - undefined sslkey, sslcert macros
 Summary:	Flexible communications server for Jabber/XMPP
@@ -29,6 +26,8 @@ Requires:	lua-sec
 Requires:	systemd-units >= 0.38
 Requires(post,preun,postun):	systemd-units >= 38
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
 
 %description
 Prosody is a flexible communications server for Jabber/XMPP written in
@@ -81,7 +80,8 @@ install -p %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/%{name}
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-%useradd -u xxx -d %{_sharedstatedir}/%{name} -c "prosody daemon" %{name} -g XXX
+%groupadd -g 306 prosody
+%useradd -u 306 -r -d %{_sharedstatedir}/%{name} -s /bin/false -c "prosody daemo" -g prosody prosody
 
 %preun
 if [ "$1" = "0" ]; then
@@ -126,6 +126,7 @@ fi
 %postun
 if [ "$1" = "0" ]; then
 	%userremove %{name}
+	%groupremove http
 fi
 %systemd_reload
 
