@@ -1,7 +1,9 @@
 # TODO
 # - register uid/gid
 # - register group (default "users" is not fine!)
+# - useradd deps
 # - bashism in %post
+# - undefined sslkey, sslcert macros
 Summary:	Flexible communications server for Jabber/XMPP
 Name:		prosody
 Version:	0.9.2
