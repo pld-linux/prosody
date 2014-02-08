@@ -46,6 +46,7 @@ sed -i -e 's|\r||g' doc/stanza.txt doc/session.txt doc/roster_format.txt
   --lua-suffix=51 \
   --prefix=%{_prefix}
 %{__make} \
+	CC=%{__cc} \
 	CFLAGS="%{rpmcflags} -fPIC"
 
 %install
