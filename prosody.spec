@@ -78,34 +78,21 @@ rm -rf $RPM_BUILD_ROOT
 %pre
 %{_sbindir}/useradd -d %{_sharedstatedir}/%{name} -r -s /sbin/nologin %{name} 2> /dev/null || :
 
-
 %preun
 if [ $1 = 0 ]; then
-    # Package removal, not upgrade
-    %if 0%{?fedora} >= 15 || 0%{?rhel} >= 7
-    /bin/systemctl --no-reload disable %{name}.service > /dev/null 2>&1 || :
-    /bin/systemctl stop %{name}.service > /dev/null 2>&1 || :
-    %else
-    service %{name} stop > /dev/null 2>&1 || :
-    chkconfig --del %{name} || :
-    %endif
+    %service prosody stop
+    /sbin/chkconfig --del prosody
 fi
-
+%systemd_preun prosody.service
 
 %post
-if [ $1 -eq 1 ] ; then
-    # Initial installation
-    %if 0%{?fedora} >= 15 || 0%{?rhel} >= 7
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-    %else
-    chkconfig --add %{name} || :
-    %endif
-fi
+/sbin/chkconfig --add prosody
+%systemd_post prosody.service
 umask 077
 if [ ! -f %{sslkey} ] ; then
-%{_bindir}/openssl genrsa 1024 > %{sslkey} 2> /dev/null
-chown root:%{name} %{sslkey}
-chmod 640 %{sslkey}
+    %{_bindir}/openssl genrsa 1024 > %{sslkey} 2> /dev/null
+    chown root:%{name} %{sslkey}
+    chmod 640 %{sslkey}
 fi
 
 FQDN=`hostname`
@@ -129,14 +116,12 @@ chmod 644 %{sslcert}
 fi
 
 
-%if 0%{?fedora} >= 15 || 0%{?rhel} >= 7
 %postun
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 if [ $1 -ge 1 ] ; then
-    # Package upgrade, not uninstall
-    /bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
+    %service -q prosody reload
+    %systemd_service_reload prosody.service
 fi
-%endif
 
 
 %files
@@ -150,7 +135,7 @@ fi
 %config(noreplace) %attr(640, root, %{name}) %{_sysconfdir}/%{name}/*
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
 %{systemdunitdir}/%{name}.service
-%{_initddir}/%{name}
+%attr(755,root,root) %{_initddir}/%{name}
 %{_mandir}/man1/*.1*
-%dir %attr(-, %{name}, %{name}) %{_sharedstatedir}/%{name}
-%dir %attr(-, %{name}, %{name}) %{_localstatedir}/run/%{name}
+%dir %attr(-,prosody,prosody) %{_sharedstatedir}/prosody
+%dir %attr(-,prosody,prosody) %{_localstatedir}/run/prosody
