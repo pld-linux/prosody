@@ -1,0 +1,19 @@
+diff -up prosody-0.8.0/prosody.cfg.lua.dist.patch prosody-0.8.0/prosody.cfg.lua.dist
+--- prosody-0.8.0/prosody.cfg.lua.dist.patch	2011-04-08 14:20:24.508974815 +0200
++++ prosody-0.8.0/prosody.cfg.lua.dist	2011-04-08 14:25:56.159877253 +0200
+@@ -123,11 +123,12 @@ authentication = "internal_plain"
+ -- Logging configuration
+ -- For advanced logging see http://prosody.im/doc/logging
+ log = {
+-	info = "prosody.log"; -- Change 'info' to 'debug' for verbose logging
+-	error = "prosody.err";
+-	-- "*syslog"; -- Uncomment this for logging to syslog
++	-- info = "prosody.log"; -- Change 'info' to 'debug' for verbose logging
++	-- error = "prosody.err";
++	"*syslog"; -- Uncomment this for logging to syslog
+ 	-- "*console"; -- Log to the console, useful for debugging with daemonize=false
+ }
++pidfile = "/var/run/prosody/prosody.pid";
+ 
+ ----------- Virtual hosts -----------
+ -- You need to add a VirtualHost entry for each domain you wish Prosody to serve.

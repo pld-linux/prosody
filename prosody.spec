@@ -1,6 +1,5 @@
-# TODO
-# - bashism in %post
-# - undefined sslkey, sslcert macros
+%define sslkey /etc/prosody/certs/localhost.key
+%define sslcert /etc/prosody/certs/localhost.crt
 Summary:	Flexible communications server for Jabber/XMPP
 Name:		prosody
 Version:	0.9.2
@@ -12,6 +11,7 @@ Source0:	http://prosody.im/downloads/source/%{name}-%{version}.tar.gz
 Source1:	%{name}.init
 Source2:	%{name}.tmpfiles
 Source3:	%{name}.service
+Patch0:		%{name}-config.patch
 URL:		http://prosody.im/
 BuildRequires:	libidn-devel
 BuildRequires:	lua51-devel
@@ -37,6 +37,7 @@ rapidly develop added functionality, or prototype new protocols.
 
 %prep
 %setup -q
+%patch0 -p1
 sed -e 's|$(PREFIX)/lib|$(PREFIX)/%{_lib}|' -i Makefile
 # fix wrong end of line encoding
 sed -i -e 's|\r||g' doc/stanza.txt doc/session.txt doc/roster_format.txt
@@ -76,6 +77,8 @@ cp -p %{SOURCE2} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/%{name}.conf
 install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
 install -p %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/%{name}
 
+rm $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/certs/*
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -93,7 +96,7 @@ fi
 %post
 umask 077
 if [ ! -f %{sslkey} ]; then
-	%{_bindir}/openssl genrsa 1024 > %{sslkey} 2> /dev/null
+	%{_bindir}/openssl genrsa 2048 > %{sslkey} 2> /dev/null
 	chown root:%{name} %{sslkey}
 	chmod 640 %{sslkey}
 fi
@@ -104,9 +107,8 @@ if [ ! -f %{sslcert} ]; then
 		FQDN=localhost.localdomain
 	fi
 
-	# FIXME: $RANDOM is bashism!
-	cat << -EOF | %{_bindir}/openssl req -new -key %{sslkey} \
-	 -x509 -days 365 -set_serial $RANDOM \
+	cat <<-CERT | %{_bindir}/openssl req -new -key %{sslkey} \
+	 -x509 -days 365 \
 	 -out %{sslcert} 2>/dev/null
 	--
 	SomeState
@@ -115,7 +117,7 @@ if [ ! -f %{sslcert} ]; then
 	SomeOrganizationalUnit
 	${FQDN}
 	root@${FQDN}
-	EOF
+	CERT
 	chmod 644 %{sslcert}
 fi
 
@@ -145,14 +147,6 @@ fi
 %{_libdir}/%{name}/prosody.version
 %dir %{_sysconfdir}/%{name}
 %dir %{_sysconfdir}/%{name}/certs
-%config(noreplace) %attr(640,root,prosody) %{_sysconfdir}/%{name}/certs/example.com.cnf
-%config(noreplace) %attr(640,root,prosody) %{_sysconfdir}/%{name}/certs/example.com.crt
-%config(noreplace) %attr(640,root,prosody) %{_sysconfdir}/%{name}/certs/example.com.key
-%config(noreplace) %attr(640,root,prosody) %{_sysconfdir}/%{name}/certs/localhost.cnf
-%config(noreplace) %attr(640,root,prosody) %{_sysconfdir}/%{name}/certs/localhost.crt
-%config(noreplace) %attr(640,root,prosody) %{_sysconfdir}/%{name}/certs/localhost.key
-%config(noreplace) %attr(640,root,prosody) %{_sysconfdir}/%{name}/certs/openssl.cnf
-%config(noreplace) %attr(640,root,prosody) %{_sysconfdir}/%{name}/certs/Makefile
 %config(noreplace) %attr(640,root,prosody) %{_sysconfdir}/%{name}/prosody.cfg.lua
 %{systemdtmpfilesdir}/prosody.conf
 %{systemdunitdir}/prosody.service
