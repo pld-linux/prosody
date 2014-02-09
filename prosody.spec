@@ -46,7 +46,8 @@ sed -i -e 's|\r||g' doc/stanza.txt doc/session.txt doc/roster_format.txt
 ./configure \
   --with-lua-include=%{_includedir}/lua51 \
   --lua-suffix=51 \
-  --prefix=%{_prefix}
+  --prefix=%{_prefix} \
+  --runwith=lua51
 %{__make} \
 	CC=%{__cc} \
 	CFLAGS="%{rpmcflags} -fPIC"
