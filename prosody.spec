@@ -25,9 +25,9 @@ Requires:	lua-filesystem
 Requires:	lua-sec
 Requires:	systemd-units >= 0.38
 Requires(post,preun,postun):	systemd-units >= 38
-BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
+BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 Prosody is a flexible communications server for Jabber/XMPP written in
@@ -40,17 +40,18 @@ rapidly develop added functionality, or prototype new protocols.
 %patch0 -p1
 sed -e 's|$(PREFIX)/lib|$(PREFIX)/%{_lib}|' -i Makefile
 # fix wrong end of line encoding
-sed -i -e 's|\r||g' doc/stanza.txt doc/session.txt doc/roster_format.txt
+%undos doc/stanza.txt doc/session.txt doc/roster_format.txt
 
 %build
 ./configure \
-  --with-lua-include=%{_includedir}/lua51 \
-  --lua-suffix=51 \
-  --prefix=%{_prefix} \
-  --runwith=lua51
-%{__make} \
-	CC=%{__cc} \
-	CFLAGS="%{rpmcflags} -fPIC"
+	--prefix=%{_prefix} \
+	--with-lua-include=%{_includedir}/lua51 \
+	--lua-suffix=51 \
+	--runwith=lua51 \
+	--c-compiler="%{__cc}" \
+	--cflags="%{rpmcppflags} %{rpmcflags} -fPIC -Wall -D_GNU_SOURCE" \
+	--ldflags="%{rpmldflags} -shared"
+%{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
