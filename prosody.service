@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=forking
-PIDFile=/var/run/prosody/prosody.pid
+PIDFile=/run/prosody/prosody.pid
 ExecStart=/usr/bin/prosodyctl start
 ExecStop=/usr/bin/prosodyctl stop
 

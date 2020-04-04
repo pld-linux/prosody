@@ -1,9 +1,8 @@
-diff -up prosody-0.8.0/prosody.cfg.lua.dist.patch prosody-0.8.0/prosody.cfg.lua.dist
---- prosody-0.8.0/prosody.cfg.lua.dist.patch	2011-04-08 14:20:24.508974815 +0200
-+++ prosody-0.8.0/prosody.cfg.lua.dist	2011-04-08 14:25:56.159877253 +0200
-@@ -123,11 +123,12 @@ authentication = "internal_plain"
+--- prosody-0.11.5/prosody.cfg.lua.dist.orig	2020-01-19 16:50:32.000000000 +0100
++++ prosody-0.11.5/prosody.cfg.lua.dist	2020-04-04 11:24:01.668047272 +0200
+@@ -153,11 +153,12 @@
  -- Logging configuration
- -- For advanced logging see http://prosody.im/doc/logging
+ -- For advanced logging see https://prosody.im/doc/logging
  log = {
 -	info = "prosody.log"; -- Change 'info' to 'debug' for verbose logging
 -	error = "prosody.err";
@@ -13,7 +12,7 @@ diff -up prosody-0.8.0/prosody.cfg.lua.dist.patch prosody-0.8.0/prosody.cfg.lua.
 +	"*syslog"; -- Uncomment this for logging to syslog
  	-- "*console"; -- Log to the console, useful for debugging with daemonize=false
  }
-+pidfile = "/var/run/prosody/prosody.pid";
++pidfile = "/run/prosody/prosody.pid";
  
- ----------- Virtual hosts -----------
- -- You need to add a VirtualHost entry for each domain you wish Prosody to serve.
+ -- Uncomment to enable statistics
+ -- For more info see https://prosody.im/doc/statistics

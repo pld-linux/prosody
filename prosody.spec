@@ -2,19 +2,19 @@
 %define sslcert /etc/prosody/certs/localhost.crt
 Summary:	Flexible communications server for Jabber/XMPP
 Name:		prosody
-Version:	0.9.2
+Version:	0.11.5
 Release:	0.1
 License:	MIT
 Group:		Daemons
 Source0:	http://prosody.im/downloads/source/%{name}-%{version}.tar.gz
-# Source0-md5:	bb91f73be0e19d049f1a57951b52c3a2
+# Source0-md5:	224b9b49bd1a568a9548590ade253dd6
 Source1:	%{name}.init
 Source2:	%{name}.tmpfiles
 Source3:	%{name}.service
 Patch0:		%{name}-config.patch
 URL:		http://prosody.im/
 BuildRequires:	libidn-devel
-BuildRequires:	lua51-devel
+BuildRequires:	lua53-devel
 BuildRequires:	openssl-devel
 BuildRequires:	rpmbuild(macros) >= 1.647
 BuildRequires:	sed >= 4.0
@@ -38,20 +38,23 @@ rapidly develop added functionality, or prototype new protocols.
 %prep
 %setup -q
 %patch0 -p1
-sed -e 's|$(PREFIX)/lib|$(PREFIX)/%{_lib}|' -i Makefile
 # fix wrong end of line encoding
 %undos doc/stanza.txt doc/session.txt doc/roster_format.txt
 
 %build
 ./configure \
 	--prefix=%{_prefix} \
-	--with-lua-include=%{_includedir}/lua51 \
-	--lua-suffix=51 \
-	--runwith=lua51 \
+	--libdir=%{_libdir} \
+	--with-lua-include=%{_includedir}/lua5.3 \
+	--lua-suffix=5.3 \
+	--runwith=lua5.3 \
 	--c-compiler="%{__cc}" \
 	--cflags="%{rpmcppflags} %{rpmcflags} -fPIC -Wall -D_GNU_SOURCE" \
 	--ldflags="%{rpmldflags} -shared"
 %{__make}
+
+sed -i -e '1c #!/usr/bin/lua5.3' prosody.install
+sed -i -e '1c #!/usr/bin/lua5.3' prosodyctl.install
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -65,7 +68,7 @@ chmod -x $RPM_BUILD_ROOT%{_libdir}/%{name}/%{name}.version
 chmod 0755 $RPM_BUILD_ROOT%{_libdir}/%{name}/util/*.so
 
 # directories for datadir and pids
-install -d $RPM_BUILD_ROOT{%{_sharedstatedir}/%{name},%{_localstatedir}/run/%{name}}
+install -d $RPM_BUILD_ROOT{%{_sharedstatedir}/%{name},/run/%{name}}
 
 # systemd stuff
 install -d $RPM_BUILD_ROOT%{systemdunitdir}
@@ -145,7 +148,10 @@ fi
 %{_libdir}/%{name}/core
 %{_libdir}/%{name}/modules
 %{_libdir}/%{name}/net
-%{_libdir}/%{name}/util
+%dir %{_libdir}/%{name}/util
+%{_libdir}/%{name}/util/*.lua
+%attr(755,root,root) %{_libdir}/%{name}/util/*.so
+%{_libdir}/%{name}/util/sasl
 %{_libdir}/%{name}/prosody.version
 %dir %{_sysconfdir}/%{name}
 %dir %{_sysconfdir}/%{name}/certs
@@ -153,4 +159,4 @@ fi
 %{systemdtmpfilesdir}/prosody.conf
 %{systemdunitdir}/prosody.service
 %dir %attr(755,prosody,prosody) %{_sharedstatedir}/prosody
-%dir %attr(710,prosody,prosody) %{_localstatedir}/run/prosody
+%dir %attr(710,prosody,prosody) /run/prosody
