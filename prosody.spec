@@ -37,7 +37,7 @@ rapidly develop added functionality, or prototype new protocols.
 
 %prep
 %setup -q
-%patch0 -p1
+%patch -P0 -p1
 # fix wrong end of line encoding
 %undos doc/stanza.txt doc/session.txt doc/roster_format.txt
 
